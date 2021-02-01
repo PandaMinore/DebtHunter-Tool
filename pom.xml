@@ -1,0 +1,187 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>SATD</groupId>
+	<artifactId>SATD</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>SATD</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	
+	<repositories>
+		
+		<repository>
+			<id>AsposeJavaAPI</id>
+			<name>Aspose Java API</name>
+			<url>https://repository.aspose.com/repo/</url>
+		</repository>
+		
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.8</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/nz.ac.waikato.cms.weka/weka-stable -->
+		<dependency>
+			<groupId>nz.ac.waikato.cms.weka</groupId>
+			<artifactId>weka-stable</artifactId>
+			<version>3.8.0</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/nz.ac.waikato.cms.weka/LibSVM -->
+		<dependency>
+			<groupId>nz.ac.waikato.cms.weka</groupId>
+			<artifactId>LibSVM</artifactId>
+			<version>1.0.10</version>
+		</dependency>
+		
+  		<!-- https://mvnrepository.com/artifact/nz.ac.waikato.cms.weka/SMOTE -->
+		<dependency>
+		    <groupId>nz.ac.waikato.cms.weka</groupId>
+		    <artifactId>SMOTE</artifactId>
+		    <version>1.0.3</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/nz.ac.waikato.cms.weka/gridSearch -->
+		<dependency>
+		    <groupId>nz.ac.waikato.cms.weka</groupId>
+		    <artifactId>gridSearch</artifactId>
+		    <version>1.0.11</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-math3</artifactId>
+		    <version>3.4.1</version>
+		</dependency>	
+		
+		<dependency>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>4.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jdom</groupId>
+			<artifactId>jdom2</artifactId>
+			<version>2.0.6</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.javaparser</groupId>
+			<artifactId>javaparser-core</artifactId>
+			<version>3.4.3</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.11.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.8</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>1.18</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.mauricioaniche</groupId>
+			<artifactId>ck</artifactId>
+			<version>0.5.1</version>
+		</dependency>
+		
+		<!-- https://github.com/fracpete/snowball-stemmers-weka-package -->
+		<dependency>
+	      <groupId>com.github.fracpete</groupId>
+	      <artifactId>snowball-stemmers-weka-package</artifactId>
+	      <version>1.0.1</version>
+	      <exclusions>
+	        <exclusion>
+	          <groupId>nz.ac.waikato.cms.weka</groupId>
+	          <artifactId>weka-dev</artifactId>
+	        </exclusion>
+	        <exclusion>
+	          <groupId>org.pentaho.pentaho-commons</groupId>
+	          <artifactId>pentaho-package-manager</artifactId>
+	        </exclusion>
+	      </exclusions>
+	    </dependency>
+
+	</dependencies>
+	
+	<build>
+
+		<resources>
+			<resource>
+				<directory>src/resources</directory>
+				<targetPath>resources</targetPath>
+			</resource>
+
+		</resources>
+
+		<sourceDirectory>src</sourceDirectory>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.5.1</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.1</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<transformers>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>weka.weka.SATDanalysis</mainClass>
+								</transformer>
+							</transformers>
+
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+
+	</build>
+	
+</project>
