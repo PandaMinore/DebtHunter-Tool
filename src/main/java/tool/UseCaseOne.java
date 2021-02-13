@@ -13,7 +13,7 @@ public class UseCaseOne {
 		Add add = new Add();
 		add.setAttributeIndex("last");
 		add.setNominalLabels("TEST, IMPLEMENTATION, DESIGN, DEFECT, DOCUMENTATION, WITHOUT_CLASSIFICATION");
-		add.setAttributeName("Label");
+		add.setAttributeName("classification");
 		add.setInputFormat(test);
 		test = Filter.useFilter(test, add);
 		
@@ -82,14 +82,17 @@ public class UseCaseOne {
 	}
 
 	public static void debtHunterLabeling (String path, Instances test) throws Exception {
-			
+		
+		System.out.println("You chose the DebtHunter pre-trained model. Good choice!");
+		
 		FilteredClassifier binaryClassifier = (FilteredClassifier) weka.core.SerializationHelper.read("/preTrainedModels/DHbinaryClassifier.model");
 		FilteredClassifier multiClassifier = (FilteredClassifier) weka.core.SerializationHelper.read("/preTrainedModels/DHmultiClassifier.model");
 		
-		test.setClassIndex(test.numAttributes() - 1);
 
 		// assign labels to all comments
 		test = assignLabel(test, binaryClassifier, multiClassifier);
+		
+		System.out.println("I labeled the comments! Now I save them!");
 
 		// remove from testPath the file name (final part)
 		String target = "/datasets/";
@@ -105,7 +108,7 @@ public class UseCaseOne {
 
 	public static void userClassifierLabeling (Boolean twoStep, String TestPath, Instances test, String modelPath1, String modelPath2) throws Exception {
 		
-		test.setClassIndex(test.numAttributes() - 1);
+		System.out.println("I'm using your pre-trained model.");
 		
 		if (twoStep) {
 			
@@ -125,6 +128,7 @@ public class UseCaseOne {
 			// assign labels to all comments
 			test = assignLabel(test, binaryClassifier, multiClassifier);
 
+			System.out.println("I labeled the comments! Now I save them!");
 
 			// save test set comments labeled in "dataLabeled.csv"
 			DataHandler.saveData(test, "dataLabeled", TestPath);

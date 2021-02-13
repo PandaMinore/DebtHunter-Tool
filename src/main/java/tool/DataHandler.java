@@ -78,6 +78,16 @@ public class DataHandler {
 		return data;
 	}
 	
+	public static Instances removeAttribute(Instances data) throws Exception {
+		
+		Remove rm = new Remove();
+		rm.setAttributeIndices("first");
+		rm.setInputFormat(data);
+		Instances newData = Filter.useFilter(data, rm);
+		
+		return newData;
+	}
+	
 	// delete the piece of string that starts from index "start" and finish to "end"
 	public static String pathModifier(String path, int start, int end) {
 		

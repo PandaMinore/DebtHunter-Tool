@@ -186,7 +186,7 @@ public class JiraMiner {
 	
 	public static void main(String[] args) throws Exception {
 
-		String saveDir = "D:/apache-camel/issues";
+		String saveDir = ".";
 		int initial = 1;
 		int end = 15000;
 		String project = "CAMEL";
@@ -202,15 +202,15 @@ public class JiraMiner {
 										  "2.12.0","2.13.0","2.14.0","2.15.0",
 								  "2.16.0","2.17.0","2.18.0","2.19.0","2.20.0"};
 		
-//		downloadIssuesAffectingVersion(saveDir,project,version,component);
+		downloadIssuesAffectingVersion(base_url,saveDir,project,version,component);
 		
-//		saveDir = "C:/Users/Anto/Desktop/cxf/issues";
+//		saveDir = "C:/Users/irene/Desktop;
 //		project = "CXF";
 //		version = "2.7";
 //		component = "Core";
 //		downloadIssuesAffectingVersion(base_url,saveDir,project,version,component);
 		
-		saveDir = "C:/Users/Anto/Desktop/hibernate/issues";
+		saveDir = ".";
 		project = "HHH";
 		version = "5.4.0";
 		component = "hibernate-core";
@@ -218,9 +218,9 @@ public class JiraMiner {
 		downloadIssuesAffectingVersion(base_url,saveDir,project,version,component);
 		
 //		for(String v : versions)
-//			filterIssues(saveDir, v,component);
+//			filterIssues(saveDir, v, component);
 			
-//		filterIssues(saveDir, version,component);
+//		filterIssues(saveDir, version, component);
 		
 //		System.out.println(getIssuesVersion(project, version));
 

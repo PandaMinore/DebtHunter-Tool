@@ -7,6 +7,7 @@ import weka.core.Instances;
 
 public class UseCaseTwo {
 
+	// TODO: passare come argomento il percorso d'output da richiedere all'utente
 	public static void trainModel(Instances binTraining, Instances multiTraining, String path) throws Exception {
 		
 		SMO binaryClassifier = new SMO();
@@ -17,13 +18,24 @@ public class UseCaseTwo {
 		SMO multiClassifier = binaryClassifier;
 		
 		//1st step: Binary
+		System.out.println("1st step: Paramenters optimization started.");
+
 		binaryClassifier = (SMO) Classification.parametersOptimization(binTraining, binaryClassifier, "DebtHunter", "binary");
+		
+		System.out.println("1st step: Training phase started.");
+
 		FilteredClassifier binaryClass = Classification.train(binTraining, binaryClassifier, "binary"); 
 
 		
 		//2nd step: Multi-class
+		System.out.println("2nd step: Paramenters optimization started.");
+
 		multiClassifier = (SMO) Classification.parametersOptimization(multiTraining, multiClassifier, "DebtHunter", "multi");
+		
+		System.out.println("2nd step: Training phase started.");
+
 		FilteredClassifier multiClass = Classification.train(multiTraining, multiClassifier, "multi");
+		
 		
 		String target = "/datasets/";
 		int startIndex = path.indexOf(target);
@@ -31,9 +43,10 @@ public class UseCaseTwo {
 		String initialPath = DataHandler.pathModifier(path, startIndex, stopIndex);
 		
 		//save pre-trained models
-		weka.core.SerializationHelper.write(initialPath + "/preTrainedModels/binaryClassifier.model", binaryClass);
-		weka.core.SerializationHelper.write(initialPath + "/preTrainedModels/multiClassifier.model", multiClass);
+		weka.core.SerializationHelper.write("./preTrainedModels/binaryClassifier.model", binaryClass);
+		weka.core.SerializationHelper.write("./preTrainedModels/multiClassifier.model", multiClass);
 		
+		System.out.println("Models training ended!");
 
 	}
 

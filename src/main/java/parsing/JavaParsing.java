@@ -33,7 +33,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.mauricioaniche.ck.util.SourceCodeLineCounter;
 
-import main.java.utils.FileIterator;
+import utils.FileIterator;
 
 
 public class JavaParsing {
@@ -162,9 +162,8 @@ public class JavaParsing {
 		Set<String> top_levels = getTopLevelPackages(packages);	
 		System.out.println(top_levels);
 		
-		//Abstract	ID	classification	code	easy_code	label	projectname
-        CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("ID", "projectname","package","top_package", "Abstract", "classification", "label"));
-        int i=0;
+		//projectname		package		top_package		comment
+        CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("projectname","package","top_package", "comment"));
         String projectname = new File(path).getName();
         for(String cla : comments.keySet()){
         	
@@ -173,8 +172,7 @@ public class JavaParsing {
         	
         	List<String> comms = comments.get(cla);
         	for(String c : comms){
-        		csvPrinter.printRecord(i, projectname, pack, top, c, "undetermined", "undetermined");
-        		i++;
+        		csvPrinter.printRecord(projectname, pack, top, c);
         	}
         }
         
@@ -201,15 +199,29 @@ public class JavaParsing {
 			
 			Map<String,List<String>> aux = parseClass(new ByteArrayInputStream(baos.toByteArray()));
 			if(aux.size() > 0){
+
 				comments.putAll(aux);
 				int locc = SourceCodeLineCounter.getNumberOfLines(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(baos.toByteArray()))));
 				String cc = findClass(aux.keySet());
+				
+				System.out.println(locc);
+				System.out.println(cc);
+				
 				if(cc != null)
 					loc.put(cc,locc);
 			}
 			
 			clas = it.nextStream();
+			
+			for (String key: aux.keySet()) {
+	            System.out.println("Key number : " + key);
+	            System.out.println("Strings List : " +  aux.get(key));
+	        }
+			
 		}
+		
+		
+		
 		
 	}
 
@@ -223,7 +235,6 @@ public class JavaParsing {
 	
 		return top;
 	}
-
 
 	private static String findClass(Set<String> keySet) {
 		for(String k : keySet)
@@ -337,7 +348,7 @@ public class JavaParsing {
 	public static void main(String[] args) throws IOException {
 		
 		String path = args[0];
-		processDirectory(path,true);
+		processDirectory(path, false);
 
 	}
 
