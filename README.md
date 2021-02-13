@@ -8,22 +8,28 @@ DebtHunter help developers to manage Self-Admitted Technical Debt (SATD) more ef
 
 ### Label your Java projects comments with DebtHunter model or your pre-trained classifier
 
+Using DebtHunter pre-trained models:
 ```
-java -jar DebtHunter-tool.jar -u first 
+java -jar DebtHunter-tool.jar -u first -p ./JavaProject/path
+```
+Using your pre-trained models:
+```
+java -jar DebtHunter-tool.jar -u first -p ./JavaProject/path -m1 ./binaryModel/path -m2 ./multi-classModel/path
 ```
 
 ### Label your issue (from Jira) with DebtHunter model or your pre-trained classifier
 
 ```
-java -jar DebtHunter-tool.jar -u first
+java -jar DebtHunter-tool.jar -u first -j 
 ```
 
 ### Train your classifier
 
+Put your training data into datasets folder.
 ```
 java -jar DebtHunter-tool.jar -u second -l ./datasets/training.arff
 ```
-
+----------------------------------------------------------------
 You can see all commands with help:
 
 ```
