@@ -30,7 +30,7 @@ Put your training data into datasets folder.
 java -jar DebtHunter-tool.jar -u second -l ./datasets/training.arff
 ```
 ----------------------------------------------------------------
-You can see all commands with help:
+You can see all commands with the help command:
 
 ```
 java -jar DebtHunter-tool.jar -h
