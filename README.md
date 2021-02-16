@@ -7,6 +7,7 @@ DebtHunter help developers to manage Self-Admitted Technical Debt (SATD) more ef
 2. Open cmd in the fold where you download the jar
 
 ### Label your Java projects comments with DebtHunter model or your pre-trained classifier
+It is advisable to put the chosen project folder in the same folder as DebtHunter-tool.jar. In *Resources* directory is possible to find a project example (*sampleDirectory*) to be anlysed.
 
 Using DebtHunter pre-trained models:
 ```
