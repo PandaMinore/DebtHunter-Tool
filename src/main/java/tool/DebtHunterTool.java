@@ -3,6 +3,7 @@ package tool;
 import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -48,47 +49,31 @@ public class DebtHunterTool implements Runnable {
 		if (useCase.equals("first")) {
 			
 			System.out.println("You selected the first use case!");
+			String path = "";
 			
-			Boolean userGivesClassifiers = false;
-			
-			if (StringUtils.isEmpty(projectPath)) {
+			if (StringUtils.isNotEmpty(projectPath)) {
 				// if the input data are java files
 				try {
 					JavaParsing.processDirectory(projectPath, false);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-			} else if (StringUtils.isEmpty(jiraRepo)) {
-				//JiraMiner.
+				path = projectPath + "/comments.csv";
+				
+			} else if (StringUtils.isNotEmpty(jiraRepo)) {
+				//TODO: JiraMiner.
 			}
+			
+			// upload csv for data cleaning
+			Map<String, String> comments = null;
+			try {
+				comments = DataHandler.loadFile(path);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			Instances test = DataHandler.creatingArff(comments);
 			
 
-			// TODO: upload CSVs
-			// TODO: create arff file
-			
-			
-			String TestPath = "./datasets/testData.arff";
-			String target = "/datasets/";
-			int startIndex = 0;
-			int stopIndex = TestPath.indexOf(target);
-			String endPath = DataHandler.pathModifier(TestPath, startIndex, stopIndex);
-			
-			
-			ArffLoader loader = new ArffLoader();
-			try {
-				loader.setSource(new File(endPath));
-			} catch (IOException e) {
-				e.printStackTrace();
-			} 
-			// last part of test set path
-			Instances test = null;
-			
-			try {
-				test = loader.getDataSet();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
 			// remove not useful columns (i.e. project name, package name and top package or only project name)
 			Instances newTest = null;
 			while (test.numAttributes() > 2) {
@@ -100,16 +85,16 @@ public class DebtHunterTool implements Runnable {
 			}
 			
 			// if the user chooses the first use case and not provides a pre-trained model
-			if(!userGivesClassifiers) {
+			if((StringUtils.isEmpty(firstModelPath)) && (StringUtils.isEmpty(secondModelPath))) {
 				
 				try {
-					UseCaseOne.debtHunterLabeling(TestPath, newTest);
+					UseCaseOne.debtHunterLabeling(newTest);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			
 			// The user chooses the first use case and provides 2 pre-trained models in input
-			} else if(userGivesClassifiers) {
+			} else if((StringUtils.isNotEmpty(firstModelPath)) && (StringUtils.isNotEmpty(secondModelPath))) {
 				
 				Boolean twoStep = true;
 				
@@ -117,12 +102,32 @@ public class DebtHunterTool implements Runnable {
 				String modelPath2 = secondModelPath; //"./preTrainedModels/DHmultiClassifier.model";
 				
 				try {
-					UseCaseOne.userClassifierLabeling(twoStep, TestPath, test, modelPath1, modelPath2);
+					UseCaseOne.userClassifierLabeling(twoStep, newTest, modelPath1, modelPath2);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				
+			} else if(((StringUtils.isEmpty(firstModelPath)) && (StringUtils.isNotEmpty(secondModelPath))) || ((StringUtils.isNotEmpty(firstModelPath)) && (StringUtils.isEmpty(secondModelPath)))) {
+				System.out.println("You not provided one of two pre-trained models.");
+				System.exit(0);
 			}
+			
+			
+			//TODO: formattare nel modo corretto il test set (rimettere i nomi delle classi, project...)
+			if (StringUtils.isNotEmpty(projectPath))
+				try {
+					DataHandler.saveData(newTest, "comments", path);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			else
+				try {
+					DataHandler.saveData(newTest, "comments", path);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+		
+			
 			
 		// The user provides labeled data (training set).
 		} else if (useCase.equals("second")) {

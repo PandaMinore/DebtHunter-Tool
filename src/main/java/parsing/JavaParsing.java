@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -112,7 +113,9 @@ public class JavaParsing {
 		}
 	}
 	
-	public static void processDirectory(String path,boolean process) throws IOException{
+	public static void processDirectory(String path, boolean process) throws IOException{
+		
+		Boolean firstTime = true;
 		
 		File f = new File(path);
 		for(File ff : f.listFiles()){
@@ -123,22 +126,25 @@ public class JavaParsing {
 				if(ff.isFile() && (ff.getName().endsWith(".jar") || ff.getName().endsWith(".zip") || ff.getName().endsWith("tag.gz")))
 					full_path = ff.getAbsolutePath().substring(0,ff.getAbsolutePath().lastIndexOf("."));
 			
+			System.out.println(full_path);
+			
 			if(full_path == null)
 				continue;
 			
 			if(process)
 				processSourceCode(full_path);
 			else
-				saveComments(full_path);
+				saveComments(full_path, path, firstTime);
+				firstTime = false;
 		}
 		
 	}
 	
-	public static void saveComments(String path) throws IOException{
+	public static void saveComments(String full_path, String path, Boolean firstTime) throws IOException{
 		
-		System.out.println("Getting comments... " + path + " " + new Date());
+		System.out.println("Getting comments... " + full_path + " " + new Date());
 		
-		FileIterator it = FileIterator.getIterator(path);
+		FileIterator it = FileIterator.getIterator(full_path);
 
 		Map<String,List<String>> comments = new HashMap<>();
 		Set<String> packages = new HashSet<>();
@@ -156,29 +162,53 @@ public class JavaParsing {
 			clas = it.nextStream();
 		}
 		
-		//save file...
-		BufferedWriter writer = Files.newBufferedWriter(Paths.get(path+"_COMMENTS.csv"));
-
-		Set<String> top_levels = getTopLevelPackages(packages);	
-		System.out.println(top_levels);
-		
-		//projectname		package		top_package		comment
-        CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("projectname","package","top_package", "comment"));
-        String projectname = new File(path).getName();
-        for(String cla : comments.keySet()){
-        	
-        	String pack = cla.substring(0, cla.lastIndexOf("."));
-        	String top = getTop(top_levels, pack);
-        	
-        	List<String> comms = comments.get(cla);
-        	for(String c : comms){
-        		csvPrinter.printRecord(projectname, pack, top, c);
-        	}
-        }
-        
-        csvPrinter.flush();  
-        csvPrinter.close();
-		
+		if (firstTime ) {
+			
+			//save file
+			BufferedWriter writer = Files.newBufferedWriter(Paths.get(path + "/comments.csv"));
+	
+			Set<String> top_levels = getTopLevelPackages(packages);	
+			
+			//projectname		package		top_package		comment
+	        CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("projectname","package","top_package", "comment"));
+	        String projectname = new File(full_path).getName();
+	        for(String cla : comments.keySet()){
+	        	
+	        	String pack = cla.substring(0, cla.lastIndexOf("."));
+	        	String top = getTop(top_levels, pack);
+	        	
+	        	List<String> comms = comments.get(cla);
+	        	for(String c : comms){
+	        		csvPrinter.printRecord(projectname, pack, top, c);
+	        	}
+	        }
+	        
+	        csvPrinter.flush();  
+	        csvPrinter.close();
+	        
+		} else {
+			FileWriter csv = new FileWriter(path + "/comments.csv", true);
+			BufferedWriter writer = new BufferedWriter(csv);
+			
+			Set<String> top_levels = getTopLevelPackages(packages);	
+			
+			String projectname = new File(full_path).getName();
+	        for(String cla : comments.keySet()){
+	        	
+	        	String pack = cla.substring(0, cla.lastIndexOf("."));
+	        	String top = getTop(top_levels, pack);
+	        	
+	        	List<String> comms = comments.get(cla);
+	        	for(String c : comms){
+	        		String line = projectname + ", " + pack + ", " + top + ", " + c;
+	        		writer.write(line);
+	        		writer.newLine();
+	        	}
+	        }
+			
+			writer.close();
+			
+		}
 	}
 	
 	public static void processSourceCode(String path) throws IOException{

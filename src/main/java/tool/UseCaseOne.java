@@ -81,7 +81,7 @@ public class UseCaseOne {
 		return test;
 	}
 
-	public static void debtHunterLabeling (String path, Instances test) throws Exception {
+	public static Instances debtHunterLabeling (Instances test) throws Exception {
 		
 		System.out.println("You chose the DebtHunter pre-trained model. Good choice!");
 		
@@ -93,20 +93,12 @@ public class UseCaseOne {
 		test = assignLabel(test, binaryClassifier, multiClassifier);
 		
 		System.out.println("I labeled the comments! Now I save them!");
-
-		// remove from testPath the file name (final part)
-		String target = "/datasets/";
-		int startIndex = path.indexOf(target) + 10;
-		int stopIndex = path.length();
-		String initialPath = DataHandler.pathModifier(path, startIndex, stopIndex);
-
-		// create test sets from user's comments extracted and save it as "dataLabeled.csv"
-		DataHandler.saveData(test, "dataLabeled", initialPath);
-
+		
+		return test;
 		
 	}
 
-	public static void userClassifierLabeling (Boolean twoStep, String TestPath, Instances test, String modelPath1, String modelPath2) throws Exception {
+	public static Instances userClassifierLabeling (Boolean twoStep, Instances test, String modelPath1, String modelPath2) throws Exception {
 		
 		System.out.println("I'm using your pre-trained model.");
 		
@@ -129,12 +121,9 @@ public class UseCaseOne {
 			test = assignLabel(test, binaryClassifier, multiClassifier);
 
 			System.out.println("I labeled the comments! Now I save them!");
-
-			// save test set comments labeled in "dataLabeled.csv"
-			DataHandler.saveData(test, "dataLabeled", TestPath);
-			
-			
+	
 		}
+		return test;
 	}
 
 }
