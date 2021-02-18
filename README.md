@@ -18,7 +18,7 @@ It is advisable to put the chosen project folder in the same folder as DebtHunte
     ```
     java -jar DebtHunter-tool.jar -u first -p ./SampleDirectory
     ```
-    - Using your pre-trained models:
+    - Using your pre-trained models (for testing the tool you can use the pre-trained models in the preTrainedModels directory):
     ```
     java -jar DebtHunter-tool.jar -u first -p ./SampleDirectory -m1 ./preTrainedModels/DHbinaryClassifier.model -m2 ./preTrainedModels/DHmultiClassifier.model
     ```
