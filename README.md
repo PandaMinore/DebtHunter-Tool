@@ -43,6 +43,7 @@ It is advisable to put the chosen project folder in the same folder as DebtHunte
 ```
 java -jar DebtHunter-tool.jar -u second -l ./datasets/training.arff
 ```
+For test this funcitonality of the tool you can download the *training.arff* file in *dataset* path.
 ----------------------------------------------------------------
 You can see all commands with the help command:
 
