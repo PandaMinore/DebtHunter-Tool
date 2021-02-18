@@ -152,10 +152,10 @@ public class DataHandler {
 		return data;
 	}
 	
-	public static Instances removeAttribute(Instances data) throws Exception {
+	public static Instances removeAttribute(Instances data, String index) throws Exception {
 		
 		Remove rm = new Remove();
-		rm.setAttributeIndices("first");
+		rm.setAttributeIndices(index);
 		rm.setInputFormat(data);
 		Instances newData = Filter.useFilter(data, rm);
 		
@@ -173,4 +173,22 @@ public class DataHandler {
 		
 	}
 	
+	public static Instances mergeRecords(Instances first, Instances second) {
+		
+		int size = first.numInstances();
+		Instances merge = first;
+		
+		// concatenate the features of the first set to the features of the second 
+		for (int i = 0; i < size; i++) {
+
+			// get label
+			String label = second.instance(i).stringValue(0);
+			
+			merge.instance(i).setValue(merge.numAttributes() - 1, label);
+
+		}
+		
+		return merge;
+		
+	}
 }

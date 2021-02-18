@@ -116,6 +116,7 @@ public class UseCaseOne {
 			
 			FilteredClassifier binaryClassifier = (FilteredClassifier) weka.core.SerializationHelper.read(endPath1);
 			FilteredClassifier multiClassifier = (FilteredClassifier) weka.core.SerializationHelper.read(endPath2);
+			System.out.println("Your binary classifier implements " + binaryClassifier.getClassifier() + " and your multi-class classifier implements " + multiClassifier.getClassifier());
 			
 			// assign labels to all comments
 			test = assignLabel(test, binaryClassifier, multiClassifier);

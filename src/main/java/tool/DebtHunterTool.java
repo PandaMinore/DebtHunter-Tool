@@ -46,20 +46,22 @@ public class DebtHunterTool implements Runnable {
 		
 		System.out.println("Let's start!");
 		
+		
 		if (useCase.equals("first")) {
 			
 			System.out.println("You selected the first use case!");
 			String path = "";
 			
+			// if the input data is java files
 			if (StringUtils.isNotEmpty(projectPath)) {
-				// if the input data are java files
 				try {
 					JavaParsing.processDirectory(projectPath, false);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 				path = projectPath + "/comments.csv";
-				
+			
+			// if the input data is issue tracker
 			} else if (StringUtils.isNotEmpty(jiraRepo)) {
 				//TODO: JiraMiner.
 			}
@@ -73,12 +75,11 @@ public class DebtHunterTool implements Runnable {
 			}
 			Instances test = DataHandler.creatingArff(comments);
 			
-
 			// remove not useful columns (i.e. project name, package name and top package or only project name)
-			Instances newTest = null;
-			while (test.numAttributes() > 2) {
+			Instances newTest = test;
+			while (newTest.numAttributes() > 2) {
 				try {
-					newTest = DataHandler.removeAttribute(test);
+					newTest = DataHandler.removeAttribute(newTest, "first");
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -113,11 +114,15 @@ public class DebtHunterTool implements Runnable {
 			}
 			
 			
-			//TODO: formattare nel modo corretto il test set (rimettere i nomi delle classi, project...)
+			//create output file and save it
 			if (StringUtils.isNotEmpty(projectPath))
 				try {
+					newTest = DataHandler.removeAttribute(newTest, "first");
+					DataHandler.mergeRecords(test, newTest);
 					DataHandler.saveData(newTest, "comments", path);
 				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			else
@@ -153,7 +158,7 @@ public class DebtHunterTool implements Runnable {
 			// remove the not useful columns (i.e. project name, package name and top package or only project name)
 			while (training.numAttributes() > 2) {
 				try {
-					training = DataHandler.removeAttribute(training);
+					training = DataHandler.removeAttribute(training, "first");
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
