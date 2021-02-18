@@ -16,11 +16,11 @@ It is advisable to put the chosen project folder in the same folder as DebtHunte
 
     - Using DebtHunter pre-trained models:
     ```
-    java -jar DebtHunter-tool.jar -u first -p ./JavaProject/path
+    java -jar DebtHunter-tool.jar -u first -p ./SampleDirectory
     ```
     - Using your pre-trained models:
     ```
-    java -jar DebtHunter-tool.jar -u first -p ./JavaProject/path -m1 ./binaryModel/path -m2 ./multi-classModel/path
+    java -jar DebtHunter-tool.jar -u first -p ./SampleDirectory -m1 ./preTrainedModels/DHbinaryClassifier.model -m2 ./preTrainedModels/DHmultiClassifier.model
     ```
 
 ### Label your issue (from Jira) with DebtHunter model or your pre-trained classifier
