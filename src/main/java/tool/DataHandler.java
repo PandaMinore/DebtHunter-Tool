@@ -27,6 +27,23 @@ import weka.filters.unsupervised.instance.RemoveWithValues;
 
 public class DataHandler {
 	
+	public static String cleanComment (String comment) {
+		
+		String regex = "\\b([a-zA-Z][\\w_]*(\\.[a-zA-Z][\\w_]*)+)\\(\\)";
+		
+		comment.replaceAll(regex, "JavaClassSATD").replaceAll("[0-9]", " ")
+		.replaceAll("`", "\'")
+		.replaceAll("won\'\\s*t", "will not").replaceAll("let\'\\s*s", "let us") // irregular contractions
+		.replaceAll("n\'\\s*t", " not") //all "not" contractions
+		.replaceAll("\'\\s*ll", " will").replaceAll("\'\\s*ve", " have").replaceAll("\'\\s*m", " am").replaceAll("\'\\s*re", " are").replaceAll("\'\\s*s", " is")  //most used contractions
+		.replaceAll("gotta", "have got to").replaceAll("kinda", "kind of").replaceAll("wanna", "want to").replaceAll("gimme", "give me").replaceAll("lotta", "lot of") // slang
+		.replaceAll("lemme", "let me").replaceAll("dunno", "do not know").replaceAll("prolly", "probably") // slang
+		.replaceAll("\\p{Punct}", " ")
+		.replaceAll("\\s+", " ");
+		
+		return comment;
+	}
+	
 	public static Map<String, String> loadFile(String path) throws IOException {
 
 		Map<String, String> comments = new HashMap<>();
@@ -38,7 +55,7 @@ public class DataHandler {
 
 		for (CSVRecord csvRecord : csvParser) {
 
-			String comment = csvRecord.get(2).replaceAll(regex, "JavaClassSATD").replaceAll("[0-9]", " ")
+			String comment = csvRecord.get(3).replaceAll(regex, "JavaClassSATD").replaceAll("[0-9]", " ")
 					.replaceAll("`", "\'")
 					.replaceAll("won\'\\s*t", "will not").replaceAll("let\'\\s*s", "let us") // irregular contractions
 					.replaceAll("n\'\\s*t", " not") //all "not" contractions
@@ -55,9 +72,12 @@ public class DataHandler {
 
 			}
 			
-			String classification = csvRecord.get(1);
+			String projectName = csvRecord.get(0);
+			String packageName = csvRecord.get(1);
+			String topPackage = csvRecord.get(2);
+			String tmp = projectName + "," + packageName  + "," + topPackage;
 
-			comments.put(comment, classification);
+			comments.put(comment, tmp);
 		}
 
 		csvParser.close();
@@ -70,19 +90,21 @@ public class DataHandler {
 
 		ArrayList<Attribute> attributes = new ArrayList<>();
 		attributes.add(new Attribute("comment", (ArrayList<String>) null)); // a string attribute
-		attributes.add(new Attribute("classification", new ArrayList<String>(new HashSet<String>(comments.values())))); // a nominal attribute with the definition of all possible values
+		attributes.add(new Attribute("package", new ArrayList<String>(new HashSet<String>(comments.values())))); // a nominal attribute with the definition of all possible values
 
 		Instances instances = new Instances("comments", attributes, comments.size());
-		instances.setClassIndex(1); // the target class is the column in position 1
-
+		instances.setClassIndex(0);
+		
 		for (String k : comments.keySet()) {
-
+			
 			Instance i = new DenseInstance(attributes.size());
 			i.setDataset(instances);
-			i.setValue(0, k);
+			i.setValue(1, k); //0
 			i.setClassValue(comments.get(k));
 
 			instances.add(i);
+			
+			System.out.println(i);
 		}
 		return instances;
 	}
@@ -173,10 +195,18 @@ public class DataHandler {
 		
 	}
 	
-	public static Instances mergeRecords(Instances first, Instances second) {
+	public static Instances mergeRecords(Instances first, Instances second) throws Exception {
 		
 		int size = first.numInstances();
 		Instances merge = first;
+		
+		// create new feature
+		Add add = new Add();
+		add.setAttributeIndex("last");
+		add.setNominalLabels("SATD, WITHOUT_CLASSIFICATION");
+		add.setAttributeName("BinaryClassification");
+		add.setInputFormat(merge);
+		merge = Filter.useFilter(merge, add);
 		
 		// concatenate the features of the first set to the features of the second 
 		for (int i = 0; i < size; i++) {
@@ -185,6 +215,7 @@ public class DataHandler {
 			String label = second.instance(i).stringValue(0);
 			
 			merge.instance(i).setValue(merge.numAttributes() - 1, label);
+//			System.out.println(merge.instance(i));
 
 		}
 		

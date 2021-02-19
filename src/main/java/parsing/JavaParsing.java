@@ -34,7 +34,11 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.mauricioaniche.ck.util.SourceCodeLineCounter;
 
+import tool.DataHandler;
 import utils.FileIterator;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
 
 
 public class JavaParsing {
@@ -113,9 +117,11 @@ public class JavaParsing {
 		}
 	}
 	
-	public static void processDirectory(String path, boolean process) throws IOException{
+	public static Instances processDirectory(String path, boolean process) throws IOException{
 		
 		Boolean firstTime = true;
+		
+		Instances data = null;
 		
 		File f = new File(path);
 		for(File ff : f.listFiles()){
@@ -134,13 +140,19 @@ public class JavaParsing {
 			if(process)
 				processSourceCode(full_path);
 			else
-				saveComments(full_path, path, firstTime);
+				data = saveComments(full_path, path, firstTime);
 				firstTime = false;
+				return data;
 		}
+		
+		return null;
 		
 	}
 	
-	public static void saveComments(String full_path, String path, Boolean firstTime) throws IOException{
+	public static Instances saveComments(String full_path, String path, Boolean firstTime) throws IOException{
+		
+		//TODO: aggiungere le 4 colonne
+		Instances data = null;
 		
 		System.out.println("Getting comments... " + full_path + " " + new Date());
 		
@@ -162,7 +174,7 @@ public class JavaParsing {
 			clas = it.nextStream();
 		}
 		
-		if (firstTime ) {
+		if (firstTime) {
 			
 			//save file
 			BufferedWriter writer = Files.newBufferedWriter(Paths.get(path + "/comments.csv"));
@@ -170,7 +182,7 @@ public class JavaParsing {
 			Set<String> top_levels = getTopLevelPackages(packages);	
 			
 			//projectname		package		top_package		comment
-	        CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("projectname","package","top_package", "comment"));
+	        CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("projectname", "package", "top_package", "comment"));
 	        String projectname = new File(full_path).getName();
 	        for(String cla : comments.keySet()){
 	        	
@@ -179,7 +191,24 @@ public class JavaParsing {
 	        	
 	        	List<String> comms = comments.get(cla);
 	        	for(String c : comms){
+
 	        		csvPrinter.printRecord(projectname, pack, top, c);
+	        		
+	        		c = DataHandler.cleanComment(c);
+	        		
+	        		// remove all empty instances
+	        		if (c.contentEquals(" ")) {
+
+	        			continue;
+
+	        		}
+	        		
+	        		Instance inst  = new DenseInstance(4);
+	        		inst.setValue(0 , projectname);
+	        		inst.setValue(1 , pack);
+	        		inst.setValue(2 , top);
+	        		inst.setValue(3 , c);
+	        		data.add(inst);
 	        	}
 	        }
 	        
@@ -203,12 +232,32 @@ public class JavaParsing {
 	        		String line = projectname + ", " + pack + ", " + top + ", " + c;
 	        		writer.write(line);
 	        		writer.newLine();
+	        		
+	        		c = DataHandler.cleanComment(c);
+	        		
+	        		// remove all empty instances
+	        		if (c.contentEquals(" ")) {
+
+	        			continue;
+
+	        		}
+	        		
+	        		Instance inst  = new DenseInstance(4);
+	        		inst.setValue(0 , projectname);
+	        		inst.setValue(1 , pack);
+	        		inst.setValue(2 , top);
+	        		inst.setValue(3 , c);
+	        		data.add(inst);
+
 	        	}
 	        }
 			
 			writer.close();
 			
 		}
+		
+		return data;
+		
 	}
 	
 	public static void processSourceCode(String path) throws IOException{
@@ -249,8 +298,6 @@ public class JavaParsing {
 	        }
 			
 		}
-		
-		
 		
 		
 	}
@@ -378,7 +425,8 @@ public class JavaParsing {
 	public static void main(String[] args) throws IOException {
 		
 		String path = args[0];
-		processDirectory(path, false);
+		Instances data = processDirectory(path, false);
+		System.out.println(data);
 
 	}
 

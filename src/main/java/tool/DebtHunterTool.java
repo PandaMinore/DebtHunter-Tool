@@ -14,7 +14,8 @@ import picocli.CommandLine.Parameters;
 
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
-
+import weka.core.converters.ArffSaver;
+import weka.core.converters.ConverterUtils.DataSource;
 import parsing.JavaParsing;
 
 @Command(name = "DebtHunter", mixinStandardHelpOptions = true, version = "DebtHunter 1.0.0",
@@ -51,11 +52,12 @@ public class DebtHunterTool implements Runnable {
 			
 			System.out.println("You selected the first use case!");
 			String path = "";
+			Instances test = null;
 			
 			// if the input data is java files
 			if (StringUtils.isNotEmpty(projectPath)) {
 				try {
-					JavaParsing.processDirectory(projectPath, false);
+					test = JavaParsing.processDirectory(projectPath, false);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -66,7 +68,8 @@ public class DebtHunterTool implements Runnable {
 				//TODO: JiraMiner.
 			}
 			
-			// upload csv for data cleaning
+			
+/*			// upload csv for data cleaning
 			Map<String, String> comments = null;
 			try {
 				comments = DataHandler.loadFile(path);
@@ -74,36 +77,36 @@ public class DebtHunterTool implements Runnable {
 				e1.printStackTrace();
 			}
 			Instances test = DataHandler.creatingArff(comments);
-			
+*/			
 			// remove not useful columns (i.e. project name, package name and top package or only project name)
-			Instances newTest = test;
-			while (newTest.numAttributes() > 2) {
+			Instances onlyComments = test;
+			while (onlyComments.numAttributes() > 1) {
 				try {
-					newTest = DataHandler.removeAttribute(newTest, "first");
+					onlyComments = DataHandler.removeAttribute(onlyComments, "first");
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
+			System.out.println("AAAAAAAAAAAAAAAAAAAA " + test.instance(0));
+			System.out.println("AAAAAAAAAAAAAAAAAAAA " + onlyComments.instance(0));
 			
 			// if the user chooses the first use case and not provides a pre-trained model
 			if((StringUtils.isEmpty(firstModelPath)) && (StringUtils.isEmpty(secondModelPath))) {
 				
 				try {
-					UseCaseOne.debtHunterLabeling(newTest);
+					UseCaseOne.debtHunterLabeling(onlyComments);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			
-			// The user chooses the first use case and provides 2 pre-trained models in input
+			// The user provides 2 pre-trained models in input
 			} else if((StringUtils.isNotEmpty(firstModelPath)) && (StringUtils.isNotEmpty(secondModelPath))) {
-				
-				Boolean twoStep = true;
 				
 				String modelPath1 = firstModelPath; //"./preTrainedModels/DHbinaryClassifier.model"; 
 				String modelPath2 = secondModelPath; //"./preTrainedModels/DHmultiClassifier.model";
 				
 				try {
-					UseCaseOne.userClassifierLabeling(twoStep, newTest, modelPath1, modelPath2);
+					UseCaseOne.userClassifierLabeling(onlyComments, modelPath1, modelPath2);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -117,9 +120,9 @@ public class DebtHunterTool implements Runnable {
 			//create output file and save it
 			if (StringUtils.isNotEmpty(projectPath))
 				try {
-					newTest = DataHandler.removeAttribute(newTest, "first");
-					DataHandler.mergeRecords(test, newTest);
-					DataHandler.saveData(newTest, "comments", path);
+					onlyComments = DataHandler.removeAttribute(onlyComments, "first");
+					onlyComments = DataHandler.mergeRecords(test, onlyComments);
+					DataHandler.saveData(onlyComments, "commentsLabeled", path);
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (Exception e) {
@@ -127,7 +130,7 @@ public class DebtHunterTool implements Runnable {
 				}
 			else
 				try {
-					DataHandler.saveData(newTest, "comments", path);
+					DataHandler.saveData(onlyComments, "comments", projectPath);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -168,23 +171,15 @@ public class DebtHunterTool implements Runnable {
 
 			System.out.println("The training data is ok!");
 			
-			// binarization
-			Instances binTraining = null;
-			try {
-				binTraining = DataHandler.binarization(training);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			// remove non-SATD instances
 			Instances multiTraining = null;
+			Instances binTraining = null;
+			
 			try {
-				multiTraining = DataHandler.removeClass(training);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+				// binarization
+				binTraining = DataHandler.binarization(training);
 
-			try {
+				// remove non-SATD instances
+				multiTraining = DataHandler.removeClass(training);
 				UseCaseTwo.trainModel(binTraining, multiTraining, LabeledPath);
 			} catch (Exception e) {
 				e.printStackTrace();
