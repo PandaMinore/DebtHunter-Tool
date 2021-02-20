@@ -38,10 +38,10 @@ It is advisable to put the chosen project folder in the same folder as DebtHunte
 
 ### Train your classifier
 4. Download *datasets* folder in the same folder as DebtHunter-tool.jar.
-5. Put your training data into *datasets* folder.
+5. Put your labeled comments (arff format) into *datasets* folder.
 6. for example, you can execute in cmd:
 ```
-java -jar DebtHunter-tool.jar -u second -l ./datasets/training.arff
+java -jar DebtHunter-tool.jar -u second -l ./datasets/labeledComments.arff
 ```
 For test this funcitonality of the tool you can download the *training.arff* file in *dataset* path.
 ----------------------------------------------------------------
