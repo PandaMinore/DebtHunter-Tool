@@ -8,19 +8,17 @@ DebtHunter help developers to manage Self-Admitted Technical Debt (SATD) more ef
 3. choose one of two tool use cases form:
 
 ### Label your Java projects comments with DebtHunter model or your pre-trained classifier
-It is advisable to put the chosen project folder in the same folder as DebtHunter-tool.jar. In *Resources* directory is possible to find a project example (*sampleDirectory*) to be anlysed.
+In *Resources* directory is possible to find a Java project example (*sampleDirectory*) to be anlysed. You can also use the pre-trained models in the *preTrainedModels* directory for testing the tool using a custom pre-trained models.
 
-4. Download *preTrainedModels* directory (if you wanna use DebtHunter pre-trained models) in the same folder as DebtHunter-tool.jar.
-
-5. for example, you can execute in cmd:
+4. for example, you can execute in cmd:
 
     - Using DebtHunter pre-trained models:
     ```
-    java -jar DebtHunter-tool.jar -u first -p ./SampleDirectory
+    java -jar DebtHunter-tool.jar -u first -p ./SampleDirectory -o ./output
     ```
-    - Using your pre-trained models (for testing the tool you can use the pre-trained models in the preTrainedModels directory):
+    - Using your pre-trained models:
     ```
-    java -jar DebtHunter-tool.jar -u first -p ./SampleDirectory -m1 ./preTrainedModels/DHbinaryClassifier.model -m2 ./preTrainedModels/DHmultiClassifier.model
+    java -jar DebtHunter-tool.jar -u first -p ./SampleDirectory -m1 ./preTrainedModels/DHbinaryClassifier.model -m2 ./preTrainedModels/DHmultiClassifier.model -o ./output
     ```
 
 ### Label your issue (from Jira) with DebtHunter model or your pre-trained classifier
@@ -29,21 +27,20 @@ It is advisable to put the chosen project folder in the same folder as DebtHunte
 
     - Using DebtHunter pre-trained models:
     ```
-    java -jar DebtHunter-tool.jar -u first -j    
+    java -jar DebtHunter-tool.jar -u first -j    -o ./output
     ```
     - Using your pre-trained models:
     ```
-    java -jar DebtHunter-tool.jar -u first -j    -m1 ./binaryModel/path -m2 ./multi-classModel/path
+    java -jar DebtHunter-tool.jar -u first -j    -m1 ./binaryModel/path -m2 ./multi-classModel/path -o ./output
     ```
 
 ### Train your classifier
-4. Download *datasets* folder in the same folder as DebtHunter-tool.jar.
-5. Put your labeled comments (arff format) into *datasets* folder.
-6. for example, you can execute in cmd:
+In *datasets* folder you can find example labeled data to provide in input (you can download *trining.arff*). Please use as training data an .arff file.
+
+4. for example, you can execute in cmd:
 ```
-java -jar DebtHunter-tool.jar -u second -l ./datasets/labeledComments.arff
+java -jar DebtHunter-tool.jar -u second -l ./datasets/labeledComments.arff -o ./output
 ```
-For test this funcitonality of the tool you can download the *training.arff* file in *dataset* path.
 ----------------------------------------------------------------
 You can see all commands with the help command:
 
