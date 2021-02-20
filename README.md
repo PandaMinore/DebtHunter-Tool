@@ -51,6 +51,3 @@ or
 ```
 java -jar DebtHunter-tool.jar -help
 ```
-
-### Requirements
-- Weka 3.8.0 or above
