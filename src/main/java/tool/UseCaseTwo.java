@@ -8,7 +8,7 @@ import weka.core.Instances;
 public class UseCaseTwo {
 
 	// TODO: passare come argomento il percorso d'output da richiedere all'utente
-	public static void trainModel(Instances binTraining, Instances multiTraining, String path) throws Exception {
+	public static void trainModel(Instances binTraining, Instances multiTraining, String path, String outputPath) throws Exception {
 		
 		SMO binaryClassifier = new SMO();
 		binaryClassifier.setRandomSeed(8);
@@ -36,15 +36,12 @@ public class UseCaseTwo {
 
 		FilteredClassifier multiClass = Classification.train(multiTraining, multiClassifier, "multi");
 		
-		
-		String target = "/datasets/";
-		int startIndex = path.indexOf(target);
-		int stopIndex = path.length();
-		String initialPath = DataHandler.pathModifier(path, startIndex, stopIndex);
-		
+		String binaryPath = outputPath + "/binaryClassifier.model";
+		String multiPath = outputPath + "/multiClassifier.model";
+
 		//save pre-trained models
-		weka.core.SerializationHelper.write("./preTrainedModels/binaryClassifier.model", binaryClass);
-		weka.core.SerializationHelper.write("./preTrainedModels/multiClassifier.model", multiClass);
+		weka.core.SerializationHelper.write(binaryPath, binaryClass);
+		weka.core.SerializationHelper.write(multiPath, multiClass);
 		
 		System.out.println("Models training ended!");
 

@@ -1,16 +1,13 @@
 package parsing;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,7 +17,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
@@ -32,10 +28,10 @@ import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-import com.github.mauricioaniche.ck.util.SourceCodeLineCounter;
 
 import tool.DataHandler;
 import utils.FileIterator;
+import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -117,13 +113,18 @@ public class JavaParsing {
 		}
 	}
 	
-	public static Instances processDirectory(String path, boolean process) throws IOException{
+	public static Instances processDirectory(String projectPath, String outputPath) throws Exception{
 		
 		Boolean firstTime = true;
 		
-		Instances data = null;
+		ArrayList<Attribute> attributes = new ArrayList<>();
+		attributes.add(new Attribute("projectname", (ArrayList<String>) null));
+		attributes.add(new Attribute("packagee", (ArrayList<String>) null));
+		attributes.add(new Attribute("top_package", (ArrayList<String>) null));
+		attributes.add(new Attribute("comment", (ArrayList<String>) null));
+        Instances data = new Instances("comments", attributes, 1);
 		
-		File f = new File(path);
+		File f = new File(projectPath);
 		for(File ff : f.listFiles()){
 			String full_path = null;
 			if(ff.isDirectory())
@@ -132,27 +133,19 @@ public class JavaParsing {
 				if(ff.isFile() && (ff.getName().endsWith(".jar") || ff.getName().endsWith(".zip") || ff.getName().endsWith("tag.gz")))
 					full_path = ff.getAbsolutePath().substring(0,ff.getAbsolutePath().lastIndexOf("."));
 			
-			System.out.println(full_path);
-			
 			if(full_path == null)
 				continue;
 			
-			if(process)
-				processSourceCode(full_path);
-			else
-				data = saveComments(full_path, path, firstTime);
-				firstTime = false;
-				return data;
+			data = saveComments(full_path, projectPath, outputPath, firstTime, data);
+			firstTime = false;
+			
 		}
 		
-		return null;
+		return data;
 		
 	}
 	
-	public static Instances saveComments(String full_path, String path, Boolean firstTime) throws IOException{
-		
-		//TODO: aggiungere le 4 colonne
-		Instances data = null;
+	private static Instances saveComments(String full_path, String path, String outputPath, Boolean firstTime, Instances data) throws Exception{
 		
 		System.out.println("Getting comments... " + full_path + " " + new Date());
 		
@@ -174,10 +167,11 @@ public class JavaParsing {
 			clas = it.nextStream();
 		}
 		
+		
 		if (firstTime) {
 			
 			//save file
-			BufferedWriter writer = Files.newBufferedWriter(Paths.get(path + "/comments.csv"));
+			BufferedWriter writer = Files.newBufferedWriter(Paths.get(outputPath + "/comments.csv"));
 	
 			Set<String> top_levels = getTopLevelPackages(packages);	
 			
@@ -194,6 +188,7 @@ public class JavaParsing {
 
 	        		csvPrinter.printRecord(projectname, pack, top, c);
 	        		
+	        		// comments cleaning
 	        		c = DataHandler.cleanComment(c);
 	        		
 	        		// remove all empty instances
@@ -204,6 +199,7 @@ public class JavaParsing {
 	        		}
 	        		
 	        		Instance inst  = new DenseInstance(4);
+	        		inst.setDataset(data);
 	        		inst.setValue(0 , projectname);
 	        		inst.setValue(1 , pack);
 	        		inst.setValue(2 , top);
@@ -215,8 +211,10 @@ public class JavaParsing {
 	        csvPrinter.flush();  
 	        csvPrinter.close();
 	        
+	        return data;
+	        
 		} else {
-			FileWriter csv = new FileWriter(path + "/comments.csv", true);
+			FileWriter csv = new FileWriter(outputPath + "/comments.csv", true);
 			BufferedWriter writer = new BufferedWriter(csv);
 			
 			Set<String> top_levels = getTopLevelPackages(packages);	
@@ -227,12 +225,13 @@ public class JavaParsing {
 	        	String pack = cla.substring(0, cla.lastIndexOf("."));
 	        	String top = getTop(top_levels, pack);
 	        	
-	        	List<String> comms = comments.get(cla);
+	        	List<String> comms = comments.get(cla);	        	
 	        	for(String c : comms){
 	        		String line = projectname + ", " + pack + ", " + top + ", " + c;
 	        		writer.write(line);
 	        		writer.newLine();
 	        		
+	        		// comments cleaning
 	        		c = DataHandler.cleanComment(c);
 	        		
 	        		// remove all empty instances
@@ -243,6 +242,7 @@ public class JavaParsing {
 	        		}
 	        		
 	        		Instance inst  = new DenseInstance(4);
+	        		inst.setDataset(data);
 	        		inst.setValue(0 , projectname);
 	        		inst.setValue(1 , pack);
 	        		inst.setValue(2 , top);
@@ -253,52 +253,9 @@ public class JavaParsing {
 	        }
 			
 			writer.close();
+			return data;
 			
 		}
-		
-		return data;
-		
-	}
-	
-	public static void processSourceCode(String path) throws IOException{
-		
-		System.out.println("Processing... " + path + " " + new Date());
-		
-		FileIterator it = FileIterator.getIterator(path);
-
-		Map<String,List<String>> comments = new HashMap<>();
-		Map<String,Integer> loc = new HashMap<>(); 
-		
-		InputStream clas = it.nextStream();
-		while(clas != null){
-
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			
-			IOUtils.copy(clas, baos);
-			
-			Map<String,List<String>> aux = parseClass(new ByteArrayInputStream(baos.toByteArray()));
-			if(aux.size() > 0){
-
-				comments.putAll(aux);
-				int locc = SourceCodeLineCounter.getNumberOfLines(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(baos.toByteArray()))));
-				String cc = findClass(aux.keySet());
-				
-				System.out.println(locc);
-				System.out.println(cc);
-				
-				if(cc != null)
-					loc.put(cc,locc);
-			}
-			
-			clas = it.nextStream();
-			
-			for (String key: aux.keySet()) {
-	            System.out.println("Key number : " + key);
-	            System.out.println("Strings List : " +  aux.get(key));
-	        }
-			
-		}
-		
 		
 	}
 
@@ -422,10 +379,11 @@ public class JavaParsing {
 		return packages;
 	}
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		
 		String path = args[0];
-		Instances data = processDirectory(path, false);
+		String outputPath = args[1];
+		Instances data = processDirectory(path, outputPath);
 		System.out.println(data);
 
 	}

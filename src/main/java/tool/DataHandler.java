@@ -2,21 +2,7 @@ package tool;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-
-import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVSaver;
@@ -44,82 +30,17 @@ public class DataHandler {
 		return comment;
 	}
 	
-	public static Map<String, String> loadFile(String path) throws IOException {
-
-		Map<String, String> comments = new HashMap<>();
-
-		Reader reader = Files.newBufferedReader(Paths.get(path));
-		CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader());
-
-		String regex = "\\b([a-zA-Z][\\w_]*(\\.[a-zA-Z][\\w_]*)+)\\(\\)";
-
-		for (CSVRecord csvRecord : csvParser) {
-
-			String comment = csvRecord.get(3).replaceAll(regex, "JavaClassSATD").replaceAll("[0-9]", " ")
-					.replaceAll("`", "\'")
-					.replaceAll("won\'\\s*t", "will not").replaceAll("let\'\\s*s", "let us") // irregular contractions
-					.replaceAll("n\'\\s*t", " not") //all "not" contractions
-					.replaceAll("\'\\s*ll", " will").replaceAll("\'\\s*ve", " have").replaceAll("\'\\s*m", " am").replaceAll("\'\\s*re", " are").replaceAll("\'\\s*s", " is")  //most used contractions
-					.replaceAll("gotta", "have got to").replaceAll("kinda", "kind of").replaceAll("wanna", "want to").replaceAll("gimme", "give me").replaceAll("lotta", "lot of") // slang
-					.replaceAll("lemme", "let me").replaceAll("dunno", "do not know").replaceAll("prolly", "probably") // slang
-					.replaceAll("\\p{Punct}", " ")
-					.replaceAll("\\s+", " ");
-
-			// remove all empty instances
-			if (comment.contentEquals(" ")) {
-
-				continue;
-
-			}
-			
-			String projectName = csvRecord.get(0);
-			String packageName = csvRecord.get(1);
-			String topPackage = csvRecord.get(2);
-			String tmp = projectName + "," + packageName  + "," + topPackage;
-
-			comments.put(comment, tmp);
-		}
-
-		csvParser.close();
-
-		return comments;
-	}
-
-	// generate instances from csv for generate at the end arff file.
-	public static Instances creatingArff(Map<String, String> comments) {
-
-		ArrayList<Attribute> attributes = new ArrayList<>();
-		attributes.add(new Attribute("comment", (ArrayList<String>) null)); // a string attribute
-		attributes.add(new Attribute("package", new ArrayList<String>(new HashSet<String>(comments.values())))); // a nominal attribute with the definition of all possible values
-
-		Instances instances = new Instances("comments", attributes, comments.size());
-		instances.setClassIndex(0);
-		
-		for (String k : comments.keySet()) {
-			
-			Instance i = new DenseInstance(attributes.size());
-			i.setDataset(instances);
-			i.setValue(1, k); //0
-			i.setClassValue(comments.get(k));
-
-			instances.add(i);
-			
-			System.out.println(i);
-		}
-		return instances;
-	}
-	
 	//required full path
 	public static void saveData(Instances data, String dataName, String path) throws IOException {
 
 		ArffSaver saver = new ArffSaver();
 		saver.setInstances(data);
-		saver.setFile(new File(path + dataName + ".arff"));
+		saver.setFile(new File(path + "/" + dataName + ".arff"));
 		saver.writeBatch();
 
 		CSVSaver saverCSV = new CSVSaver();
 		saverCSV.setInstances(data);
-		saverCSV.setFile(new File(path + dataName + ".csv"));
+		saverCSV.setFile(new File(path + "/" + dataName + ".csv"));
 		saverCSV.writeBatch();
 
 
@@ -195,31 +116,4 @@ public class DataHandler {
 		
 	}
 	
-	public static Instances mergeRecords(Instances first, Instances second) throws Exception {
-		
-		int size = first.numInstances();
-		Instances merge = first;
-		
-		// create new feature
-		Add add = new Add();
-		add.setAttributeIndex("last");
-		add.setNominalLabels("SATD, WITHOUT_CLASSIFICATION");
-		add.setAttributeName("BinaryClassification");
-		add.setInputFormat(merge);
-		merge = Filter.useFilter(merge, add);
-		
-		// concatenate the features of the first set to the features of the second 
-		for (int i = 0; i < size; i++) {
-
-			// get label
-			String label = second.instance(i).stringValue(0);
-			
-			merge.instance(i).setValue(merge.numAttributes() - 1, label);
-//			System.out.println(merge.instance(i));
-
-		}
-		
-		return merge;
-		
-	}
 }
