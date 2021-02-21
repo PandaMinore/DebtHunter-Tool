@@ -12,6 +12,7 @@ import picocli.CommandLine.Option;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
 import parsing.JavaParsing;
+import parsing.JiraMiner;
 
 @Command(name = "DebtHunter", mixinStandardHelpOptions = true, version = "DebtHunter 1.0.0",
 description = "DebtHunter detect the Self-Admitted in your project or in issue tracker.")
@@ -26,7 +27,7 @@ public class DebtHunterTool implements Runnable {
 	
 	// Jira test set
 	@Option(names = {"-ve", "--version"}, description = "The Jira project version to analyse.")
-    private String jiraversion = "";
+    private String projectversion = "";
 	@Option(names = {"-jp", "--jiraproject"}, description = "The Jira project name to analyse.")
     private String jiraproject = "";
 	@Option(names = {"-c", "--component"}, description = "The Jira component to analyse.")
@@ -54,10 +55,10 @@ public class DebtHunterTool implements Runnable {
 			System.out.println("Please, select the use case you want to use.");
 		    System.exit(0);
 		}
+		
 		if(outputPath.equals("")) {
 			System.out.println("Please, indicate the outputs directory.");
 		    System.exit(1);
-
 		}
 		
 		
@@ -68,7 +69,6 @@ public class DebtHunterTool implements Runnable {
 			
 			System.out.println("You selected the first use case!");
 			Instances test = null;
-			String jiraPath = "";
 			
 			// if the input data is java files
 			if (StringUtils.isNotEmpty(projectPath)) {
@@ -78,9 +78,16 @@ public class DebtHunterTool implements Runnable {
 					e.printStackTrace();
 				}
 			
-			// if the input data is issue tracker TODO: aggiungere come condizione nell'if i controlli della vesione, component e dell'url. Else --> dai errore
-			} else if (StringUtils.isNotEmpty(jiraproject)) {
-				//TODO: JiraMiner.
+			// if the input data is issue tracker
+			} else if (StringUtils.isNotEmpty(jiraproject) && StringUtils.isNotEmpty(baseurl) && StringUtils.isNotEmpty(projectversion) && StringUtils.isNotEmpty(component)) {
+				try {
+					JiraMiner.downloadIssuesAffectingVersion(baseurl, outputPath, jiraproject, projectversion, component);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} else {
+				System.out.println("You miss to pass me some information.");
+			    System.exit(2);
 			}
 
 					
@@ -112,7 +119,7 @@ public class DebtHunterTool implements Runnable {
 				
 			} else if(((StringUtils.isEmpty(firstModelPath)) && (StringUtils.isNotEmpty(secondModelPath))) || ((StringUtils.isNotEmpty(firstModelPath)) && (StringUtils.isEmpty(secondModelPath)))) {
 				System.out.println("You not provided one of two pre-trained models.");
-				System.exit(2);
+				System.exit(3);
 			}
 			
 			
@@ -131,7 +138,7 @@ public class DebtHunterTool implements Runnable {
 			
 			if (LabeledPath.equals("")) {
 				System.out.println("Please, indicate the labeled data directory.");
-			    System.exit(3);
+			    System.exit(4);
 			}
 			
 			System.out.println("You selected the second use case!");
