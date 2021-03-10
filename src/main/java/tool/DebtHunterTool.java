@@ -11,6 +11,7 @@ import picocli.CommandLine.Option;
 
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
+import parsing.IssueTrackerProcessing;
 import parsing.JavaParsing;
 import parsing.JiraMiner;
 
@@ -26,13 +27,13 @@ public class DebtHunterTool implements Runnable {
     private String projectPath = "";
 	
 	// Jira test set
-	@Option(names = {"-ve", "--version"}, description = "The Jira project version to analyse.")
+	@Option(names = {"-pv", "--projectversion"}, description = "The Jira project version to analyse.")
     private String projectversion = "";
 	@Option(names = {"-jp", "--jiraproject"}, description = "The Jira project name to analyse.")
     private String jiraproject = "";
 	@Option(names = {"-c", "--component"}, description = "The Jira component to analyse.")
     private String component = "";
-	@Option(names = {"-bu", "--baseUrl"}, description = "The Jira component to analyse.")
+	@Option(names = {"-bu", "--baseUrl"}, description = "The Jira project base URL to analyse.")
     private String baseurl = "";
 	
 	@Option(names = {"-m1", "--model1"}, description = "The path of your binary model.")
@@ -82,7 +83,9 @@ public class DebtHunterTool implements Runnable {
 			} else if (StringUtils.isNotEmpty(jiraproject) && StringUtils.isNotEmpty(baseurl) && StringUtils.isNotEmpty(projectversion) && StringUtils.isNotEmpty(component)) {
 				try {
 					JiraMiner.downloadIssuesAffectingVersion(baseurl, outputPath, jiraproject, projectversion, component);
-				} catch (IOException e) {
+					String projectName = jiraproject + "-" + projectversion;
+					test = IssueTrackerProcessing.processDirectory(outputPath + "/" + projectversion, outputPath, projectName);
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			} else {

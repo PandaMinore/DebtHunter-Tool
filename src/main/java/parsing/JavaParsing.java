@@ -119,7 +119,7 @@ public class JavaParsing {
 		
 		ArrayList<Attribute> attributes = new ArrayList<>();
 		attributes.add(new Attribute("projectname", (ArrayList<String>) null));
-		attributes.add(new Attribute("packagee", (ArrayList<String>) null));
+		attributes.add(new Attribute("package", (ArrayList<String>) null));
 		attributes.add(new Attribute("top_package", (ArrayList<String>) null));
 		attributes.add(new Attribute("comment", (ArrayList<String>) null));
         Instances data = new Instances("comments", attributes, 1);

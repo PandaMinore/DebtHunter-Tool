@@ -56,8 +56,6 @@ public class UseCaseOne {
 
 				}
 				
-			System.out.println(test.instance(i) + "   binary: " + tmp + "  multi: " +  tmp2);
-				
 			}
 			
 		}
@@ -87,7 +85,6 @@ public class UseCaseOne {
 		
 		System.out.println("I'm using your pre-trained models.");
 			
-		System.out.println(modelPath1 + "    " + modelPath2);
 		FilteredClassifier binaryClassifier = (FilteredClassifier) weka.core.SerializationHelper.read(modelPath1);
 		FilteredClassifier multiClassifier = (FilteredClassifier) weka.core.SerializationHelper.read(modelPath2);
 		System.out.println("Done!");

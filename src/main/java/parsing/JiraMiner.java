@@ -9,7 +9,6 @@ import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,8 +38,6 @@ public class JiraMiner {
 
 		Document doc = Jsoup.connect(url).get();
 		
-//		System.out.println(doc);
-		
 		Element ee = doc.getElementsByClass("navigator-content").first().getElementsByClass("list-content").first();
 
 		Elements iss = ee.getElementsByAttribute("data-id");
@@ -52,10 +49,8 @@ public class JiraMiner {
 
 	public static void downloadIssuesAffectingVersion(String base_url,String saveDir, String project, String version, String component) throws IOException{
 
+		System.out.println("I searching your issues!");
 		Set<String> issues = getIssuesVersion(base_url,project,version,component);
-		
-		System.out.println(issues.size());
-//		System.exit(0);
 		
 		String url = base_url+"/si/jira.issueviews:issue-xml/";
 
@@ -67,8 +62,6 @@ public class JiraMiner {
 			String path = ff.getAbsolutePath()+File.separator+issue+".xml";
 			if(new File(path).exists())
 				continue;
-
-			System.out.println(issue+" "+new Date());
 			
 			try{
 				Document doc = Jsoup.connect(url+issue+"/"+issue+".xml").get();
@@ -142,32 +135,7 @@ public class JiraMiner {
 			if(new File(path).exists())
 				continue;
 
-						String url = base_url+i+"/"+project+"-"+i+".xml";
-//						System.out.println(url+" "+new Date());
-//						URL obj = new URL(url);
-//						BufferedReader in = null;
-//						try{
-//							HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-//							
-//						    in = new BufferedReader(
-//						             new InputStreamReader(con.getInputStream()));
-//						    
-//						}catch(IOException e){
-//							System.out.println("  ERROR -- "+e.getMessage());
-//						}
-//							
-//						if(in == null)
-//							continue;
-//						 String inputLine;
-//					     StringBuilder response = new StringBuilder();
-//					     while ((inputLine = in.readLine()) != null) {
-//					     	response.append(inputLine+System.lineSeparator());
-//					     }
-//					    
-//					     //we have the xml 
-//					     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path, false), "UTF8"));
-//					     writer.write(response.toString());
-//					     writer.close();
+			String url = base_url+i+"/" + project + "-" + i + ".xml";
 
 			
 			try {
@@ -184,47 +152,4 @@ public class JiraMiner {
 		}	
 	}
 	
-	public static void main(String[] args) throws Exception {
-
-		String saveDir = ".";
-		int initial = 1;
-		int end = 15000;
-		String project = "CAMEL";
-		String version = "2.0.0";
-		String component = "camel-core";
-		String base_url = "https://issues.apache.org/jira";
-		
-//		downloadIssues(saveDir, initial, end, project);
-
-		String [] versions = new String[]{"2.0.0","2.1.0","2.2.0","2.3.0",
-										  "2.4.0","2.5.0","2.6.0","2.7.0",
-										  "2.8.0","2.9.0","2.10.0","2.11.0",
-										  "2.12.0","2.13.0","2.14.0","2.15.0",
-								  "2.16.0","2.17.0","2.18.0","2.19.0","2.20.0"};
-		
-		downloadIssuesAffectingVersion(base_url,saveDir,project,version,component);
-		
-//		saveDir = "C:/Users/irene/Desktop;
-//		project = "CXF";
-//		version = "2.7";
-//		component = "Core";
-//		downloadIssuesAffectingVersion(base_url,saveDir,project,version,component);
-		
-		saveDir = ".";
-		project = "HHH";
-		version = "5.4.0";
-		component = "hibernate-core";
-		base_url = "https://hibernate.atlassian.net";
-		downloadIssuesAffectingVersion(base_url,saveDir,project,version,component);
-		
-//		for(String v : versions)
-//			filterIssues(saveDir, v, component);
-			
-//		filterIssues(saveDir, version, component);
-		
-//		System.out.println(getIssuesVersion(project, version));
-
-
-	}
-
 }
