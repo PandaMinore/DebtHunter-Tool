@@ -27,11 +27,11 @@ In *Resources* directory is possible to find a Java project example (*sampleDire
 
     - Using DebtHunter pre-trained models:
     ```
-    java -jar DebtHunter-tool.jar -u first -ve 2.0.0 -jp CAMEL -c camel-core -bu https://issues.apache.org/jira -o ./output
+    java -jar DebtHunter-tool.jar -u first -vp 2.0.0 -jp CAMEL -c camel-core -bu https://issues.apache.org/jira -o ./output
     ```
     - Using your pre-trained models:
     ```
-    java -jar DebtHunter-tool.jar -u first -ve 2.0.0 -jp CAMEL -c camel-core -bu https://issues.apache.org/jira -m1 ./binaryModel/path -m2 ./multi-classModel/path -o ./output
+    java -jar DebtHunter-tool.jar -u first -vp 2.0.0 -jp CAMEL -c camel-core -bu https://issues.apache.org/jira -m1 ./binaryModel/path -m2 ./multi-classModel/path -o ./output
     ```
 
 ### Train your classifier
