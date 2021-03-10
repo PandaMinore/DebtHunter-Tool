@@ -341,7 +341,7 @@ public class JavaParsing {
 		return packages;
 	}
 
-	private static Set<String> getNaivePackages(String topLevel,Set<String> packagesToSearch) {
+	private static Set<String> getNaivePackages(String topLevel, Set<String> packagesToSearch) {
 		Set<String> packages = new HashSet<>();
 				
 		if(topLevel.endsWith("."))
@@ -370,8 +370,8 @@ public class JavaParsing {
 					else
 						packages.add(a);
 				
-//				else
-//					packages.add(topLevel); //no need to check it, if there was a parent, we may have already added it
+				else
+					packages.add(topLevel); //no need to check it, if there was a parent, we may have already added it
 			
 			}
 
